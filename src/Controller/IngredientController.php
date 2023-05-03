@@ -2,7 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\Ingredient;
+use App\Form\IngredientType;
 use App\Repository\IngredientRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,7 +23,7 @@ class IngredientController extends AbstractController
      * @param Response
      */
 
-    #[Route('/ingredient', name: 'app_ingredient', methods: ['GET'])]
+    #[Route('/ingredient', name: 'ingredient.index', methods: ['GET'])]
     public function index(IngredientRepository $repository, PaginatorInterface $paginator, Request $request): Response
     {
         // knpPaginator pour les pages, 10 ingrédients par page
@@ -36,8 +39,33 @@ class IngredientController extends AbstractController
     }
 
     #[Route('/ingredient/nouveau', 'ingredient.new', methods: ['GET', 'POST'])]
-    public function new(): Response
+    public function new(
+        Request $request,
+        EntityManagerInterface $manager): Response
     {
-        return $this->render('pages/ingredient/new.html.twig');
+        $ingredient = new Ingredient();
+        $form = $this->createForm(IngredientType::class, $ingredient);
+
+        $form->handleRequest($request);
+        if($form->isSubmitted() && $form->isValid()){
+            $ingredient = $form->getData();
+            
+            // Le "commit"
+            $manager->persist($ingredient);
+            // Puis on push
+            $manager->flush();
+
+            $this->addFlash(
+                'success',
+                'Votre ingrédient a été créé avec succès !'
+            );
+
+            return $this->redirectToRoute('ingredient.index');
+        }
+
+        // Créé la vue
+        return $this->render('pages/ingredient/new.html.twig', [
+            'form' => $form->createView()
+        ]);
     }
 }
