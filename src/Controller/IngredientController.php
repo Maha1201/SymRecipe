@@ -15,7 +15,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class IngredientController extends AbstractController
 {
     /**
-     * This function displays all ingredients
+     * This controller displays all ingredients
      * 
      * @param IngredientRepository $repository
      * @param PaginatorInterface $paginator
@@ -38,18 +38,26 @@ class IngredientController extends AbstractController
         ]);
     }
 
+    /**
+     * This controller shows a form which creates an ingredient
+     * 
+     * @param Request $request
+     * @param EntityManagerInterface $manager
+     * @return Response
+     */
+
     #[Route('/ingredient/nouveau', 'ingredient.new', methods: ['GET', 'POST'])]
     public function new(
         Request $request,
-        EntityManagerInterface $manager): Response
-    {
+        EntityManagerInterface $manager
+    ): Response {
         $ingredient = new Ingredient();
         $form = $this->createForm(IngredientType::class, $ingredient);
 
         $form->handleRequest($request);
-        if($form->isSubmitted() && $form->isValid()){
+        if ($form->isSubmitted() && $form->isValid()) {
             $ingredient = $form->getData();
-            
+
             // Le "commit"
             $manager->persist($ingredient);
             // Puis on push
@@ -67,5 +75,50 @@ class IngredientController extends AbstractController
         return $this->render('pages/ingredient/new.html.twig', [
             'form' => $form->createView()
         ]);
+    }
+
+    // Gestion du formulaire de modifications d'ingrédients
+    #[Route('/ingredient/edition/{id}', 'ingredient.edit', methods: ['GET', 'POST'])]
+    public function edit(
+        Ingredient $ingredient,
+        Request $request,
+        EntityManagerInterface $manager
+    ): Response {
+        $form = $this->createForm(IngredientType::class, $ingredient);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $ingredient = $form->getData();
+
+            // Le "commit"
+            $manager->persist($ingredient);
+            // Puis on push
+            $manager->flush();
+
+            $this->addFlash(
+                'success',
+                'Votre ingrédient a été modifié avec succès !'
+            );
+
+            return $this->redirectToRoute('ingredient.index');
+        }
+
+        return $this->render('pages/ingredient/edit.html.twig', [
+            'form' => $form->createView()
+        ]);
+    }
+
+    #[Route('/ingredient/suppression/{id}', 'ingredient.delete', methods: ['GET'])]
+    public function delete(EntityManagerInterface $manager, Ingredient $ingredient): Response
+    {
+
+        $manager->remove($ingredient);
+        $manager->flush();
+
+        $this->addFlash(
+            'success',
+            'Votre ingrédient a été supprimé'
+        );
+
+        return $this->redirectToRoute('ingredient.index');
     }
 }
