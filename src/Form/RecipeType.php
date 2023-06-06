@@ -45,8 +45,9 @@ class RecipeType extends AbstractType
                 'attr' => [
                     'class' => 'form-control',
                     'min' => 1,
-                    'max' => 1440
+                    'max' => 1440,
                 ],
+                'required' => false,
                 'label' => 'Temps (en minutes)',
                 'label_attr' => [
                     'class' => 'form-label mt-4'
@@ -61,8 +62,9 @@ class RecipeType extends AbstractType
                 'attr' => [
                     'class' => 'form-control',
                     'min' => 1,
-                    'max' => 50
+                    'max' => 50,
                 ],
+                'required' => false,
                 'label' => 'Nombre de personnes',
                 'label_attr' => [
                     'class' => 'form-label mt-4'
@@ -77,8 +79,9 @@ class RecipeType extends AbstractType
                 'attr' => [
                     'class' => 'form-range',
                     'min' => 1,
-                    'max' => 5
+                    'max' => 5,
                 ],
+                'required' => false,
                 'label' => 'Difficulté',
                 'label_attr' => [
                     'class' => 'form-label mt-4'
@@ -108,6 +111,7 @@ class RecipeType extends AbstractType
                 'attr' => [
                     'class' => 'form-control',
                 ],
+                'required' => false,
                 'label' => 'Prix ',
                 'label_attr' => [
                     'class' => 'form-label mt-4'
@@ -120,11 +124,12 @@ class RecipeType extends AbstractType
 
             ->add('isFavorite', CheckboxType::class, [
                 'attr' => [
-                    'class' => 'form-range',
+                    'class' => 'form-check-input',
                 ],
+                'required' => false,
                 'label' => 'Favoris ?',
                 'label_attr' => [
-                    'class' => 'form-label mt-4'
+                    'class' => 'form-check-label'
                 ],
                 'constraints' => [
                     new Assert\NotNull()
@@ -137,12 +142,21 @@ class RecipeType extends AbstractType
                     return $r->createQueryBuilder('i')
                         ->orderBy('i.name', 'ASC');
                 },
+                'label' => 'Les ingrédients',
+                'label_attr' => [
+                    'class' => 'form-label mt-4'
+                ],
                 'choice_label' => 'name',
                 'multiple' => true,
                 'expanded' => true
             ])
 
-            ->add('submit', SubmitType::class);
+            ->add('submit', SubmitType::class, [
+                'attr' => [
+                    'class' => 'btn btn-dark mt-4'
+                ],
+                'label' => 'Créer ma recette'
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
